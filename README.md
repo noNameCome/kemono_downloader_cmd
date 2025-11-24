@@ -1,6 +1,3 @@
-# kemono_downloader_cmd
-kemono_downloader_cmd
-
 # Kemono Downloader
 
 다양한 사이트에서 컨텐츠를 다운로드하는 통합 다운로더입니다.
@@ -76,3 +73,7 @@ pip install gallery-dl
 ```bash
 pip install curl-cffi
 ```
+
+## 라이센스
+개인 사용 목적
+
