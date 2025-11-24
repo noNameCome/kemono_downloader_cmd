@@ -1,0 +1,2 @@
+# kemono_downloader_cmd
+kemono_downloader_cmd
