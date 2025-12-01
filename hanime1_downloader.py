@@ -159,6 +159,23 @@ def download_hanime_with_progress(url, output_dir, filename=None, log_func=print
             log_func("✅ Hanime 다운로드 완료!")
             if progress_callback:
                 progress_callback(100, 100)
+            
+            # 파일명 정리: "- Hanime1.me (숫자)" 제거
+            try:
+                for file in os.listdir(hanime_output_path):
+                    if re.search(r' - Hanime1\.me \(\d+\)', file):
+                        old_path = os.path.join(hanime_output_path, file)
+                        # "- Hanime1.me (숫자)" 패턴 제거
+                        new_filename = re.sub(r' - Hanime1\.me \(\d+\)', '', file)
+                        new_path = os.path.join(hanime_output_path, new_filename)
+                        
+                        # 파일명 변경
+                        if old_path != new_path and not os.path.exists(new_path):
+                            os.rename(old_path, new_path)
+                            log_func(f"📝 파일명 정리: {file} → {new_filename}")
+            except Exception as e:
+                log_func(f"⚠️ 파일명 정리 중 오류 (무시됨): {e}")
+            
             return True
         else:
             log_func(f"❌ 다운로드 실패: return code {proc.returncode}")
@@ -183,6 +200,21 @@ def download_hanime_with_progress(url, output_dir, filename=None, log_func=print
                 ydl.download([url])
             
             log_func("✅ 일반 방식으로 다운로드 완료!")
+            
+            # 파일명 정리: "- Hanime1.me (숫자)" 제거
+            try:
+                for file in os.listdir(hanime_output_path):
+                    if re.search(r' - Hanime1\.me \(\d+\)', file):
+                        old_path = os.path.join(hanime_output_path, file)
+                        new_filename = re.sub(r' - Hanime1\.me \(\d+\)', '', file)
+                        new_path = os.path.join(hanime_output_path, new_filename)
+                        
+                        if old_path != new_path and not os.path.exists(new_path):
+                            os.rename(old_path, new_path)
+                            log_func(f"📝 파일명 정리: {file} → {new_filename}")
+            except Exception as e:
+                log_func(f"⚠️ 파일명 정리 중 오류 (무시됨): {e}")
+            
             return True
             
         except Exception as fallback_e:

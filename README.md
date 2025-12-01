@@ -28,9 +28,11 @@ pip install -r requirements.txt
 
 ## 사용 방법
 
+### 기본 사용법
 1. `download_url.txt` 파일에 다운로드할 URL을 입력 (한 줄에 하나씩)
 2. `run_downloader.bat` 실행
 3. Kemono URL의 경우 필터 옵션 선택 (ZIP, RAR, 이미지, 비디오, 전체)
+
 
 ## 파일 구조
 

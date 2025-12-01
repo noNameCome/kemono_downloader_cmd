@@ -47,6 +47,7 @@ def is_twitter_url(url):
     url_lower = url.lower()
     return "x.com" in url_lower or "twitter.com" in url_lower
 
+
 def get_arcalive_title(url):
     """Arca.live 게시글 제목 가져오기"""
     try:
@@ -183,7 +184,7 @@ def download_twitter(url, browser="firefox"):
     
     try:
         # URL에서 유저명 추출
-        # 예: https://x.com/tanukichan2409 또는 https://x.com/tanukichan2409/media
+        # 예: https://x.com/username 또는 https://x.com/username/media
         match = re.search(r'(?:x\.com|twitter\.com)/([^/\?]+)', url)
         if match:
             username = match.group(1)
@@ -220,6 +221,7 @@ def download_twitter(url, browser="firefox"):
         
     except Exception as e:
         print(f"[오류] {e}")
+
 
 def get_kemono_filter_choice():
     """Kemono 다운로드 필터 선택을 한 번만 물어봄"""
