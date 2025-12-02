@@ -8,6 +8,7 @@ import zipfile
 import re
 import urllib.request
 from html.parser import HTMLParser
+from urllib.parse import urlparse
 
 # hanime1_downloader에서 함수 가져오기
 from hanime1_downloader import is_hanime, download_hanime_with_progress
@@ -35,17 +36,55 @@ def check_file(filename):
 
 def is_kemono_url(url):
     """Kemono/Coomer URL 감지"""
-    url_lower = url.lower()
-    return "kemono" in url_lower or "coomer" in url_lower
+    try:
+        # URL 정규화
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = 'https://' + url
+        
+        netloc = urlparse(url).netloc.lower()
+        # kemono.su, coomer.su 등 정확한 도메인 매칭
+        return "kemono" in netloc or "coomer" in netloc
+    except:
+        return False
 
 def is_arcalive_url(url):
     """Arca.live URL 감지"""
-    return "arca.live" in url.lower()
+    try:
+        # URL 정규화
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = 'https://' + url
+        
+        netloc = urlparse(url).netloc.lower()
+        # arca.live 도메인 매칭
+        return "arca.live" in netloc
+    except:
+        return False
+
+def is_hitomi_url(url):
+    """Hitomi.la URL 감지"""
+    try:
+        # URL 정규화
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = 'https://' + url
+        
+        netloc = urlparse(url).netloc.lower()
+        # hitomi.la 도메인 매칭
+        return "hitomi.la" in netloc or netloc == "hitomi.la" or netloc == "www.hitomi.la"
+    except:
+        return False
 
 def is_twitter_url(url):
     """X(트위터) URL 감지"""
-    url_lower = url.lower()
-    return "x.com" in url_lower or "twitter.com" in url_lower
+    try:
+        # URL 정규화
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = 'https://' + url
+        
+        netloc = urlparse(url).netloc.lower()
+        # 정확한 도메인 매칭 (xxx.com처럼 x.com이 포함된 다른 도메인과 구분)
+        return netloc == "x.com" or netloc == "www.x.com" or netloc == "twitter.com" or netloc == "www.twitter.com"
+    except:
+        return False
 
 
 def get_arcalive_title(url):
@@ -75,9 +114,32 @@ def get_arcalive_title(url):
     
     return None
 
+def download_general(url):
+    """일반 gallery-dl URL 다운로드 (gallery-dl 기본 경로 사용)"""
+    print(f"[실행] gallery-dl 시작...")
+    
+    try:
+        # 스크립트 디렉토리에서 gallery-dl.exe 찾기
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        gallery_dl_path = os.path.join(script_dir, "gallery-dl.exe")
+        
+        # gallery-dl.exe가 없으면 시스템 경로에서 찾기
+        if not os.path.exists(gallery_dl_path):
+            gallery_dl_path = "gallery-dl"
+        
+        # gallery-dl 기본 경로에 다운로드
+        subprocess.run([
+            gallery_dl_path,
+            url
+        ])
+        
+        print(f"[완료] 다운로드 완료")
+    except Exception as e:
+        print(f"[오류] {e}")
+
 def download_hitomi(url, folder_list):
     temp_folder = f"temp_download_{random.randint(10000, 99999)}"
-    print(f"[실행] gallery-dl 시작...")
+    print(f"[실행] gallery-dl 시작 (hitomi)...")
     
     try:
         # 스크립트 디렉토리에서 gallery-dl.exe 찾기
@@ -381,7 +443,7 @@ def main():
     if not check_file("download_url.txt"):
         return
     
-    # URL 목록을 먼저 읽어서 kemono/hanime/youtube/arcalive/twitter URL이 있는지 확인
+    # URL 목록을 먼저 읽어서 kemono/hanime/youtube/arcalive/twitter/hitomi URL이 있는지 확인
     urls = []
     kemono_urls = []
     hanime_urls = []
@@ -389,6 +451,7 @@ def main():
     arcalive_urls = []
     twitter_urls = []
     hitomi_urls = []
+    general_urls = []  # hitomi가 아닌 일반 gallery-dl URL
     
     with open("download_url.txt", "r", encoding="utf-8") as f:
         for line in f:
@@ -405,8 +468,10 @@ def main():
                     arcalive_urls.append(url)
                 elif is_twitter_url(url):
                     twitter_urls.append(url)
-                else:
+                elif is_hitomi_url(url):
                     hitomi_urls.append(url)
+                else:
+                    general_urls.append(url)  # 나머지는 일반 gallery-dl URL
     
     # kemono URL이 있으면 필터 선택을 한 번만 물어봄
     kemono_filter = None
@@ -497,6 +562,12 @@ def main():
         print(f"=== 다운로드 중 (hitomi): {url} ===")
         download_hitomi(url, folder_list)
     
+    # 일반 gallery-dl URL 처리
+    for url in general_urls:
+        print()
+        print(f"=== 다운로드 중 (gallery-dl): {url} ===")
+        download_general(url)
+    
     # hitomi/arcalive 폴더가 있으면 변환 및 압축 처리
     if folder_list:
         print()
@@ -504,8 +575,8 @@ def main():
         convert_to_jpg(folder_list)
         compress_folders(folder_list)
     
-    # kemono, hanime, youtube, twitter만 다운로드한 경우
-    if (kemono_urls or hanime_urls or youtube_urls or twitter_urls) and not folder_list:
+    # kemono, hanime, youtube, twitter, general만 다운로드한 경우
+    if (kemono_urls or hanime_urls or youtube_urls or twitter_urls or general_urls) and not folder_list:
         print()
         if kemono_urls:
             print("=== kemono 다운로드 완료 ===")
@@ -519,6 +590,9 @@ def main():
         if twitter_urls:
             print("=== X/Twitter 다운로드 완료 ===")
             print("[알림] X/Twitter 파일은 x 폴더에 저장되었습니다")
+        if general_urls:
+            print("=== gallery-dl 다운로드 완료 ===")
+            print("[알림] gallery-dl 파일은 gallery-dl 기본 경로에 저장되었습니다")
     
     print()
     print("=" * 50)
