@@ -3,7 +3,7 @@
 다양한 사이트에서 컨텐츠를 다운로드하는 통합 다운로더입니다.
 
 ## 지원 사이트
-- Kemono/Coomer (kemono.su, coomer.su)
+- Kemono/Coomer/Nekohouse (kemono.su, coomer.su, nekohouse.su)
 - Hanime (hanime1.me)
 - YouTube (youtube.com, youtu.be) - MP4/MP3 선택 가능
 - Arca.live (arca.live)
